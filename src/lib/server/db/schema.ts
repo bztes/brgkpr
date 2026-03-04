@@ -5,7 +5,7 @@ import { user } from './auth.schema';
 
 export * from './auth.schema';
 
-export const serversTbl = sqliteTable('servers', {
+export const serverTbl = sqliteTable('server', {
   id: text('id').primaryKey().$defaultFn(randomUUID),
   name: text('name').notNull(),
   host: text('host').notNull(),
@@ -21,11 +21,11 @@ export const serversTbl = sqliteTable('servers', {
     .notNull(),
 });
 
-export const serversRelations = relations(serversTbl, ({ many }) => ({
-  repositories: many(reposTbl),
+export const serverRelations = relations(serverTbl, ({ many }) => ({
+  repositories: many(repoTbl),
 }));
 
-export const reposTbl = sqliteTable('repositories', {
+export const repoTbl = sqliteTable('repo', {
   id: text('id').primaryKey().$defaultFn(randomUUID),
   name: text('name').notNull(),
   userId: text('user_id')
@@ -33,20 +33,20 @@ export const reposTbl = sqliteTable('repositories', {
     .references(() => user.id, { onDelete: 'restrict' }),
   serverId: text('server_id')
     .notNull()
-    .references(() => serversTbl.id, { onDelete: 'restrict' }),
+    .references(() => serverTbl.id, { onDelete: 'restrict' }),
   publicKey: text('public_key').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
 });
 
-export const repositoriesRelations = relations(reposTbl, ({ one }) => ({
-  server: one(serversTbl, {
-    fields: [reposTbl.serverId],
-    references: [serversTbl.id],
+export const repoRelations = relations(repoTbl, ({ one }) => ({
+  server: one(serverTbl, {
+    fields: [repoTbl.serverId],
+    references: [serverTbl.id],
   }),
   user: one(user, {
-    fields: [reposTbl.userId],
+    fields: [repoTbl.userId],
     references: [user.id],
   }),
 }));

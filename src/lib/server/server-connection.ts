@@ -1,13 +1,13 @@
 import { NodeSSH } from 'node-ssh';
 import { db } from './db';
 import { eq } from 'drizzle-orm';
-import { serversTbl } from './db/schema';
+import { serverTbl } from './db/schema';
 import { SSH_PASSPHRASE } from '$env/static/private';
 import { getKeyPath } from './server-keys';
 import { join } from 'path';
 
 export async function createServerConnection(serverId: string) {
-  const server = await db.query.serversTbl.findFirst({ where: eq(serversTbl.id, serverId) });
+  const server = await db.query.serverTbl.findFirst({ where: eq(serverTbl.id, serverId) });
   if (!server) {
     throw new Error(`Unknown server id ${serverId}`);
   }

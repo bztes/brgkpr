@@ -1,6 +1,6 @@
 import { query } from '$app/server';
 import { db } from '@/server/db';
-import { serversTbl } from '@/server/db/schema';
+import { serverTbl } from '@/server/db/schema';
 import { oneAffectedOrThrow, takeUniqueOrThrow } from '@/server/db/utils';
 import { eq } from 'drizzle-orm';
 import { deleteKey, generateSSHKeyPair } from '@/server/server-keys';
@@ -22,28 +22,26 @@ import { requireDefined } from '@/assert';
 export type ListMyServersType = InferQuery<typeof listMyServers>;
 export const listMyServers = query(async () => {
   await requireUser();
-  return await db.query.serversTbl.findMany();
+  return await db.query.serverTbl.findMany();
 });
 
 export type ListServersType = InferQuery<typeof listServers>;
 export const listServers = query(async () => {
   await requireAdmin();
-  return await db.query.serversTbl.findMany();
+  return await db.query.serverTbl.findMany();
 });
 
 export type GetServerType = InferQuery<typeof getServer>;
 export const getServer = query(getServerSchema, async ({ serverId }) => {
   await requireAdmin();
-  return requireDefined(
-    await db.query.serversTbl.findFirst({ where: eq(serversTbl.id, serverId) }),
-  );
+  return requireDefined(await db.query.serverTbl.findFirst({ where: eq(serverTbl.id, serverId) }));
 });
 
 export const createServer = safeForm(createServerSchema, async (data) => {
   await requireAdmin();
   const sshKey = await generateSSHKeyPair(SSH_PASSPHRASE);
   const server = await db
-    .insert(serversTbl)
+    .insert(serverTbl)
     .values({ ...data, ...sshKey })
     .returning()
     .then(takeUniqueOrThrow);
@@ -52,13 +50,13 @@ export const createServer = safeForm(createServerSchema, async (data) => {
 
 export const updateServer = safeForm(updateServerSchema, async ({ id, ...data }) => {
   await requireAdmin();
-  await db.update(serversTbl).set(data).where(eq(serversTbl.id, id)).then(oneAffectedOrThrow);
+  await db.update(serverTbl).set(data).where(eq(serverTbl.id, id)).then(oneAffectedOrThrow);
   return successResponse('Server settings saved.');
 });
 
 export const deleteServer = safeForm(deleteServerSchema, async ({ id }) => {
   await requireAdmin();
-  await db.delete(serversTbl).where(eq(serversTbl.id, id)).then(oneAffectedOrThrow);
+  await db.delete(serverTbl).where(eq(serverTbl.id, id)).then(oneAffectedOrThrow);
   await deleteKey(id);
   return successResponse('Server removed.');
 });
@@ -75,9 +73,9 @@ export const activateServer = safeForm(activateServerSchema, async ({ id }) => {
   const serverHealth = await serverConn.checkHealth();
   if (serverHealth.every((e) => e.healthy)) {
     await db
-      .update(serversTbl)
+      .update(serverTbl)
       .set({ status: 'activated' })
-      .where(eq(serversTbl.id, id))
+      .where(eq(serverTbl.id, id))
       .then(oneAffectedOrThrow);
     return successResponse('Server activated.');
   }
