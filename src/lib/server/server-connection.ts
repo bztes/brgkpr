@@ -47,7 +47,7 @@ export async function createServerConnection(serverId: string) {
       await writeRemoteFile(
         ssh,
         getAuthorizedKeyPath(repo),
-        `command="borg serve --restrict-to-path ${repoPath}",restrict ${repo.publicKey}`,
+        `command="cd ${repoPath}; borg serve --restrict-to-path ${repoPath}",restrict ${repo.publicKey}`,
       );
     },
   };
