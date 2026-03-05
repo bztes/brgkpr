@@ -5,3 +5,7 @@ export const createRepositorySchema = z.object({
   serverId: z.uuid(),
   publicKey: z.string().nonempty(),
 });
+
+export const getMyRepositorySchema = z.object({ id: z.uuid() });
+
+export const deleteRepositorySchema = z.object({ id: z.uuid() });

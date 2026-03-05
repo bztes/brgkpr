@@ -76,6 +76,13 @@ class RepoServer {
       );
     });
   }
+
+  public deleteRepoKey(repo: { id: string; userId: string }) {
+    return this.sshConnectionPool.withConnection(this.sshConfig, async (ssh) => {
+      await ssh.execCommand(`rm ${this.authorizedKeyPath(repo)}`);
+      await ssh.execCommand(`rm -r ${this.repoPath(repo)}`);
+    });
+  }
 }
 
 async function writeRemoteFile(ssh: NodeSSH, path: string, content: string) {
