@@ -3,7 +3,7 @@ import { createRepositorySchema } from '@/api/repositories.schema';
 import { db } from '@/server/db';
 import { repoTbl } from '@/server/db/schema';
 import { safeForm, successResponse, type InferQuery } from '@/remote-functions';
-import { createServerConnection } from '@/server/server-connection';
+import { repoServerHub } from '@/server/repo-server-api.svelte';
 import { takeUniqueOrThrow } from '@/server/db/utils';
 import { query } from '$app/server';
 import { eq } from 'drizzle-orm';
@@ -22,8 +22,8 @@ export const createRepository = safeForm(createRepositorySchema, async (data) =>
     .returning()
     .then(takeUniqueOrThrow);
 
-  const ssh = await createServerConnection(data.serverId);
-  await ssh.addRepoKey(repo);
+  const repoServer = await repoServerHub.get(data.serverId);
+  await repoServer.addRepoKey(repo);
 
   return successResponse('Repository created.', repo);
 });

@@ -16,8 +16,8 @@ import { redirect } from '@sveltejs/kit';
 import { SSH_PASSPHRASE } from '$env/static/private';
 import { requireAdmin, requireUser } from './auth.remote';
 import { errorResponse, safeForm, successResponse, type InferQuery } from '@/remote-functions';
-import { createServerConnection } from '@/server/server-connection';
 import { requireDefined } from '@/assert';
+import { repoServerHub } from '@/server/repo-server-api.svelte';
 
 export type ListMyServersType = InferQuery<typeof listMyServers>;
 export const listMyServers = query(async () => {
@@ -63,14 +63,14 @@ export const deleteServer = safeForm(deleteServerSchema, async ({ id }) => {
 
 export const getServerHealth = query(getServerHealthSchema, async ({ id }) => {
   await requireAdmin();
-  const serverConn = await createServerConnection(id);
-  return await serverConn.checkHealth();
+  const repoServer = await repoServerHub.get(id);
+  return await repoServer.checkHealth();
 });
 
 export const activateServer = safeForm(activateServerSchema, async ({ id }) => {
   await requireAdmin();
-  const serverConn = await createServerConnection(id);
-  const serverHealth = await serverConn.checkHealth();
+  const repoServer = await repoServerHub.get(id);
+  const serverHealth = await repoServer.checkHealth();
   if (serverHealth.every((e) => e.healthy)) {
     await db
       .update(serverTbl)
