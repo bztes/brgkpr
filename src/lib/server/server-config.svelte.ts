@@ -1,11 +1,12 @@
 import { SSH_PASSPHRASE } from '$env/static/private';
-import { getKeyPath } from './server-keys';
+import { getKeyPath } from './ssh-server-keys';
 import { join } from 'path';
 import { SSHConnectionPool, type SSHServerConfig } from './ssh-connection-pool';
 import type { NodeSSH } from 'node-ssh';
 import { getServer } from '@/api/servers.remote';
 import { SvelteMap } from 'svelte/reactivity';
 import type { InferQuery } from '@/remote-functions';
+import sshpk from 'sshpk';
 
 class RepoServerHub {
   private readonly sshConnectionPool = new SSHConnectionPool();
@@ -72,7 +73,7 @@ class RepoServer {
       await writeRemoteFile(
         ssh,
         this.authorizedKeyPath(repo),
-        `command="cd ${repoPath}; borg serve --restrict-to-path ${repoPath}",restrict ${repo.publicKey}`,
+        `command="cd ${repoPath}; borg serve --restrict-to-path ${repoPath}",restrict ${normalizePublicKey(repo.publicKey)}\n`,
       );
     });
   }
@@ -89,11 +90,15 @@ async function writeRemoteFile(ssh: NodeSSH, path: string, content: string) {
   const sftp = await ssh.requestSFTP();
 
   return new Promise((resolve, reject) => {
-    const stream = sftp.createWriteStream(path);
+    const stream = sftp.createWriteStream(path, { mode: 0o600 });
     stream.once('error', reject);
     stream.once('close', resolve);
     stream.end(content);
   });
+}
+
+export function normalizePublicKey(publicKey: string): string {
+  return sshpk.parseKey(publicKey.trim(), 'ssh').toString('ssh');
 }
 
 export const repoServerHub = new RepoServerHub();

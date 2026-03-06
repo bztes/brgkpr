@@ -7,7 +7,7 @@ import {
 import { db } from '@/server/db';
 import { repoTbl } from '@/server/db/schema';
 import { safeForm, successResponse, type InferQuery } from '@/remote-functions';
-import { repoServerHub } from '@/server/repo-server-api.svelte';
+import { normalizePublicKey, repoServerHub } from '@/server/server-config.svelte';
 import { takeUniqueOrThrow } from '@/server/db/utils';
 import { query } from '$app/server';
 import { and, eq } from 'drizzle-orm';
@@ -33,7 +33,7 @@ export const createRepository = safeForm(createRepositorySchema, async (data) =>
   const user = await requireUser();
   const repo = await db
     .insert(repoTbl)
-    .values({ ...data, userId: user.id })
+    .values({ ...data, publicKey: normalizePublicKey(data.publicKey), userId: user.id })
     .returning()
     .then(takeUniqueOrThrow);
 

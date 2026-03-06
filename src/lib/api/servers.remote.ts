@@ -3,7 +3,7 @@ import { db } from '@/server/db';
 import { serverTbl } from '@/server/db/schema';
 import { oneAffectedOrThrow, takeUniqueOrThrow } from '@/server/db/utils';
 import { eq } from 'drizzle-orm';
-import { deleteKey, generateSSHKeyPair } from '@/server/server-keys';
+import { deleteKey, generateSSHKeyPair } from '@/server/ssh-server-keys';
 import {
   activateServerSchema,
   createServerSchema,
@@ -17,7 +17,7 @@ import { SSH_PASSPHRASE } from '$env/static/private';
 import { requireAdmin, requireUser } from './auth.remote';
 import { errorResponse, safeForm, successResponse, type InferQuery } from '@/remote-functions';
 import { requireDefined } from '@/assert';
-import { repoServerHub } from '@/server/repo-server-api.svelte';
+import { repoServerHub } from '@/server/server-config.svelte';
 
 export type ListMyServersType = InferQuery<typeof listMyServers>;
 export const listMyServers = query(async () => {
