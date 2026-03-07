@@ -6,7 +6,6 @@
   import PageTitle from '@/components/ui/page-title.svelte';
   import { listServers, type ListServersType } from '@/api/servers.remote';
   import CreateServerDialog from './create-server-dialog.svelte';
-  import { set } from 'zod/v3';
   import { resolve } from '$app/paths';
 
   let serversList = await listServers();
