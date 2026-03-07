@@ -5,10 +5,11 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from './db';
 import { sendEmail } from './email';
 import { admin } from 'better-auth/plugins';
-import { ORIGIN } from '$env/static/private';
+import { BETTER_AUTH_SECRET, ORIGIN } from '$env/static/private';
 
 export const auth = betterAuth({
   baseURL: ORIGIN,
+  secret: BETTER_AUTH_SECRET,
   advanced: { database: { generateId: 'uuid' } },
   emailAndPassword: {
     enabled: true,
